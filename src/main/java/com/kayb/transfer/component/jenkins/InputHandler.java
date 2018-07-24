@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,6 +21,17 @@ import java.util.regex.Pattern;
 @Slf4j
 @Component
 public class InputHandler {
+
+    private final OkHttpClient okHttpClient;
+    private final Pattern pattern = Pattern.compile("action=\"(?<approveId>.*?)/submit\"");
+
+    public InputHandler() {
+        okHttpClient = new OkHttpClient.Builder()
+                .connectTimeout(60, TimeUnit.SECONDS)
+                .writeTimeout(60,TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .build();
+    }
 
     public String doAction(HttpServletRequest request) throws IOException {
         request.getParameterMap().entrySet().forEach(entry -> {
@@ -61,6 +73,4 @@ public class InputHandler {
         }
         throw new RuntimeException("未找到需要的approve信息");
     }
-    private OkHttpClient okHttpClient = new OkHttpClient();
-    private final Pattern pattern = Pattern.compile("action=\"(?<approveId>.*?)/submit\"");
 }
